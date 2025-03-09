@@ -86,6 +86,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation ("com.google.firebase:firebase-firestore:25.1.0")    //firestore
-    implementation ("io.github.ehsannarmani:compose-charts:0.1.2")  //compose graph
+    implementation ("co.yml:ycharts:2.1.0")  //Y-Charts
     implementation("io.coil-kt:coil-compose:2.4.0")     //coil compose
 }

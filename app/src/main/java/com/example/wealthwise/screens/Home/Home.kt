@@ -57,7 +57,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.wealthwise.R
 import com.example.wealthwise.ui.theme.BackgroundBlue
 import com.example.wealthwise.ui.theme.Montserrat
-import com.example.wealthwise.ui.theme.OptionsSelectedBlue
+import com.example.wealthwise.ui.theme.Blue80
 import com.example.wealthwise.viewmodels.TransactionViewModel
 import com.example.wealthwise.viewmodels.UserAuth
 
@@ -105,7 +105,7 @@ fun HomeScreen(authViewModel: UserAuth, transactionViewModel: TransactionViewMod
                 Icon(tint = White, imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Close App")
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = context.getString(R.string.app_name), style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = OptionsSelectedBlue), fontFamily = Montserrat)
+            Text(text = context.getString(R.string.app_name), style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Blue80), fontFamily = Montserrat)
             Spacer(modifier = Modifier.weight(1f))
             IconButton(modifier = Modifier.size(60.dp), onClick = { showSettingsDialog=true }) {
                 Icon(imageVector = Icons.Default.Settings, tint = White, contentDescription = "Settings")
@@ -121,8 +121,8 @@ fun HomeScreen(authViewModel: UserAuth, transactionViewModel: TransactionViewMod
             }
         }
         BottomNavBar(navController)
+        Spacer(modifier = Modifier.height(10.dp))
     }
-    Spacer(modifier = Modifier.width(50.dp))
 }
 
 @Composable
@@ -217,6 +217,5 @@ fun BottomNavBar(navController: NavController){
 
 @Composable
 fun NavigationIcon(navController: NavController, route: String, iconResId: Int) {
-    val currentRoute = navController.currentBackStackEntry?.destination?.route
-    Image(painter = painterResource(id = iconResId), contentDescription = route, modifier = Modifier.size(if (currentRoute == route) 40.dp else 25.dp).clickable { navController.navigate(route) })
+    Image(painter = painterResource(id = iconResId), contentDescription = route, modifier = Modifier.size(25.dp).clickable { navController.navigate(route) })
 }

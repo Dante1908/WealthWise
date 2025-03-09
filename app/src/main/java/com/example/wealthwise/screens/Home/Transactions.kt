@@ -43,8 +43,8 @@ import androidx.navigation.NavController
 import com.commandiron.compose_loading.FoldingCube
 import com.example.wealthwise.datamodels.TransactionInfo
 import com.example.wealthwise.ui.theme.BackgroundBlue
-import com.example.wealthwise.ui.theme.OptionsSelectedBlue
-import com.example.wealthwise.ui.theme.Purple80
+import com.example.wealthwise.ui.theme.Blue80
+import com.example.wealthwise.ui.theme.Green40
 import com.example.wealthwise.viewmodels.TransactionViewModel
 import com.example.wealthwise.viewmodels.TransactionsState
 import java.text.SimpleDateFormat
@@ -58,17 +58,21 @@ fun TransactionsScreen(navController: NavController,transactionViewModel: Transa
 
     when (transactionState) {
         is TransactionsState.Loading -> {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().background(color = BackgroundBlue)) {
-                FoldingCube(size = DpSize(80.dp, 80.dp), color = Purple80, durationMillisPerFraction = 300)
+            Box(contentAlignment = Alignment.Center, modifier = Modifier
+                .fillMaxSize()
+                .background(color = BackgroundBlue)) {
+                FoldingCube(size = DpSize(80.dp, 80.dp), color = Green40, durationMillisPerFraction = 300)
             }
         }
         is TransactionsState.Done -> {
             if (transactions.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No Transactions Available")
+                    Text("No Transactions Available",color = Color.White)
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp)) {
                     items(transactions) {
                         TransactionItem(it,
                             onDelete = { transactionViewModel.deleteTransaction(transactionId = it.id) },
@@ -106,13 +110,20 @@ fun TransactionItem(transactionInfo: TransactionInfo, onDelete: () -> Unit,onEdi
         else-> Icons.Default.Refresh
     }
     Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, contentColor, shape = RoundedCornerShape(10.dp)).clickable { isClicked = !isClicked }.padding(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = transactionInfo.type, tint = contentColor)
-            Column{
-                Text(text = transactionInfo.title, color = Color.White)
-                Text(text = "₹ ${transactionInfo.amount}", color = Color.White)
-                AnimatedVisibility(visible = isClicked, enter = slideInHorizontally { -it },exit = slideOutHorizontally { -it }) {
-                    Column{
+        Column{
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = icon, contentDescription = transactionInfo.type, tint = contentColor)
+                Column {
+                    Text(text = transactionInfo.title, color = Color.White)
+                    Text(text = "₹ ${transactionInfo.amount}", color = Color.White)
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = transactionInfo.date, color = Color.White)
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            Row{
+                AnimatedVisibility(visible = isClicked, enter = slideInHorizontally { -it }, exit = slideOutHorizontally { -it }) {
+                    Column(modifier = Modifier.fillMaxWidth(0.8f)) {
                         Text(text = "Category : ${transactionInfo.category}", color = Color.White)
                         Text(text = "Account : ${transactionInfo.account}", color = Color.White)
                         Text(
@@ -121,20 +132,19 @@ fun TransactionItem(transactionInfo: TransactionInfo, onDelete: () -> Unit,onEdi
                         )
                     }
                 }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = transactionInfo.date.toFormattedDate(), color = Color.White)
-            Spacer(modifier = Modifier.width(10.dp))
-            AnimatedVisibility(visible = isClicked, enter = slideInHorizontally { it },exit = slideOutHorizontally { it }) {
-                Column{
-                    IconButton(onClick = onDelete) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = OptionsSelectedBlue)
-                    }
-                    IconButton(onClick = onEdit) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = OptionsSelectedBlue)
+                Spacer(modifier = Modifier.weight(1f))
+                AnimatedVisibility(visible = isClicked, enter = slideInHorizontally { it }, exit = slideOutHorizontally { it }) {
+                    Column {
+                        IconButton(onClick = onDelete) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Blue80)
+                        }
+                        IconButton(onClick = onEdit) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Blue80)
+                        }
                     }
                 }
             }
+
         }
     }
 }

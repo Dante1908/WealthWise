@@ -1,9 +1,5 @@
 package com.example.wealthwise.screens.Home
 
-import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,135 +34,128 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import co.yml.charts.axis.AxisData
+import co.yml.charts.common.extensions.formatToSinglePrecision
+import co.yml.charts.common.model.PlotType
+import co.yml.charts.common.model.Point
+import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.Line
+import co.yml.charts.ui.linechart.model.LineChartData
+import co.yml.charts.ui.linechart.model.LinePlotData
+import co.yml.charts.ui.linechart.model.LineStyle
+import co.yml.charts.ui.piechart.charts.PieChart
+import co.yml.charts.ui.piechart.models.PieChartConfig
+import co.yml.charts.ui.piechart.models.PieChartData
 import coil.compose.rememberAsyncImagePainter
-import com.example.wealthwise.ui.theme.OptionsBlue
-import com.example.wealthwise.ui.theme.OptionsSelectedBlue
+import com.example.wealthwise.ui.theme.Blue40
+import com.example.wealthwise.ui.theme.Blue80
 import com.example.wealthwise.viewmodels.TransactionViewModel
 import com.example.wealthwise.viewmodels.UserAuth
-import ir.ehsannarmani.compose_charts.LineChart
-import ir.ehsannarmani.compose_charts.PieChart
-import ir.ehsannarmani.compose_charts.models.AnimationMode
-import ir.ehsannarmani.compose_charts.models.DrawStyle
-import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
-import ir.ehsannarmani.compose_charts.models.Line
-import ir.ehsannarmani.compose_charts.models.Pie
-import kotlin.random.Random
 
 @Composable
-fun AccountScreen(authViewModel: UserAuth,transactionViewModel: TransactionViewModel) {
+fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionViewModel) {
     val currentUserEmail = authViewModel.user.value?.email
-    val currentUser = authViewModel.user.value?.displayName?: currentUserEmail?.split("@")?.get(0)
+    val currentUser = authViewModel.user.value?.displayName ?: currentUserEmail?.split("@")?.get(0)
     val userProfilePhoto = authViewModel.user.value?.photoUrl.toString()
     var typeSelected by remember { mutableStateOf("Expense") }
 
-    val transactions = transactionViewModel.transactions.value
-    val categorySums = transactions!!.groupBy { it.category }.mapValues { entry -> entry.value.sumOf { it.amount.toDoubleOrNull() ?: 0.0 } }
-    val datewise_data = transactions.groupBy { it.date }.toSortedMap().mapValues { entry ->
-            entry.value.sumOf {
-                when (it.type) {
-                    "Income" -> it.amount.toDoubleOrNull() ?: 0.0
-                    "Expense" -> -(it.amount.toDoubleOrNull() ?: 0.0)
-                    else -> 0.0
+    val sortedTransactions = transactionViewModel.transactions.value!!.reversed()
+    val axisData = mutableMapOf<String,Float>()
+    val pointsData = mutableListOf<Point>()
+
+    var currBalance = 0.0
+    var xDist = 0.0
+
+    val dailyChanges = mutableMapOf<String,Double>()
+    for(transaction in sortedTransactions){
+        val dateStr = transaction.date
+        val amount = transaction.amount.toDouble()
+        val currentChange = dailyChanges.getOrDefault(dateStr,0.0)
+        when (transaction.type) {
+            "Expense" -> dailyChanges[dateStr] = currentChange - amount
+            "Income" -> dailyChanges[dateStr] = currentChange + amount
+            "Transfer" -> dailyChanges[dateStr] = currentChange
+        }
+    }
+    for((date,change) in dailyChanges.toSortedMap()){
+        currBalance += change
+        axisData[date] = currBalance.toFloat()
+        pointsData.add(Point(xDist.toFloat(),currBalance.toFloat()))
+        xDist+=1.0
+    }
+    val dates = axisData.keys.toList()
+    val balances = axisData.values.toList()
+
+    val xAxisData = AxisData.Builder().axisStepSize(100.dp).steps(dates.size - 1).labelData { i -> dates[i] }.labelAndAxisLinePadding(15.dp).build()
+    val minBalance = balances.minOrNull() ?: 0f
+    val maxBalance = balances.maxOrNull() ?: 0f
+    val steps = if (maxBalance == minBalance) 1 else 5
+    val yRange = if (maxBalance == minBalance) 100f else maxBalance - minBalance
+    val yStepSize = yRange / steps
+    val yAxisData = AxisData.Builder().steps(steps).labelAndAxisLinePadding(20.dp)
+        .labelData { i ->
+            val value = minBalance + (i * yStepSize)
+            value.formatToSinglePrecision()
+        }
+        .build()
+    val lineChartData = LineChartData(linePlotData = LinePlotData(lines = listOf(Line(dataPoints = pointsData, lineStyle = LineStyle(color = Color.Black)))), xAxisData = xAxisData, yAxisData = yAxisData, backgroundColor = Color.Transparent)
+    Column(modifier = Modifier.padding(5.dp).fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp))) {
+            Row(modifier = Modifier.padding(20.dp)) {
+                Image(painter = rememberAsyncImagePainter(userProfilePhoto), contentDescription = "Account Logo", modifier = Modifier.size(40.dp))
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = " $currentUser", color = White, fontWeight = FontWeight.Bold)
+                    Text(text = " $currentUserEmail", color = Gray)
                 }
             }
         }
-        .toList()
-        .runningFold("" to 0.0) { acc, (date, amount) ->
-            date to (acc.second + amount)
-        }
-        .drop(1)
-    val chartValues = datewise_data.map { (date, balance) ->
-        balance // Only the balance as y-axis, assuming x-axis is date index
-    }
-    var categorical_data by remember {
-        mutableStateOf(
-            categorySums.map { (category, amount) ->
-                Pie(
-                    label = category,
-                    data = amount,
-                    color = Color(Random.nextFloat(), Random.nextFloat(), Random.nextFloat(), 1f),
-                    selectedColor = Color.Yellow
-                )
-            }
-        )
-    }
-
-    Column(modifier = Modifier.padding(5.dp)
-        .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp))){
-                Row(modifier= Modifier.padding(20.dp)){
-                    Image(painter = rememberAsyncImagePainter(userProfilePhoto), contentDescription = "Account Logo", modifier = Modifier.size(40.dp))
-                    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally){
-                        Text(text = " $currentUser", color = White, fontWeight = FontWeight.Bold)
-                        Text(text = " $currentUserEmail", color = Gray)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.size(10.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
-
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                        listOf("Expense", "Income", "Transfer").forEach { type ->
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(0.3f).border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(10.dp)).background(color = if (typeSelected == type) OptionsSelectedBlue else OptionsBlue, shape = RoundedCornerShape(10.dp)).clickable { typeSelected = type }) {
-                                Text(text = type, color = if (typeSelected == type) Color.Black else OptionsSelectedBlue, modifier = Modifier.padding(5.dp))
-                            }
+        Spacer(modifier = Modifier.size(10.dp))
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
+            item {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    listOf("Expense", "Income", "Transfer").forEach { type ->
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.weight(0.3f).border(width = 2.dp, color = Color.Transparent, shape = RoundedCornerShape(10.dp)).background(color = if (typeSelected == type) Blue80 else Blue40, shape = RoundedCornerShape(10.dp)).clickable { typeSelected = type }) {
+                            Text(text = type, color = if (typeSelected == type) Color.Black else Blue80, modifier = Modifier.padding(5.dp))
                         }
                     }
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().padding(20.dp)) {
-                        PieChart(modifier = Modifier.size(200.dp), data = categorical_data,
-                            onPieClick = {
-                                println("${it.label} Clicked")
-                                val pieIndex = categorical_data.indexOf(it)
-                                categorical_data = categorical_data.mapIndexed { mapIndex, pie -> pie.copy(selected = pieIndex == mapIndex) }
-                            },
-                            selectedScale = 1.2f,
-                            scaleAnimEnterSpec = spring(
-                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                stiffness = Spring.StiffnessLow
-                            ),
-                            colorAnimEnterSpec = tween(300),
-                            colorAnimExitSpec = tween(300),
-                            scaleAnimExitSpec = tween(300),
-                            spaceDegreeAnimExitSpec = tween(300),
-                            style = Pie.Style.Fill
-                        )
+                }
+                Box(modifier = Modifier.fillMaxWidth()){
+                    val categoricalData = mutableMapOf<String, Float>()
+                    val typeTransactions = sortedTransactions.filter { it.type == typeSelected }.groupBy { it.category }
+                    for ((category, transactions) in typeTransactions) {
+                        val totalAmount = transactions.sumOf { it.amount.toDouble() }.toFloat()
+                        categoricalData[category] = totalAmount
                     }
-                LineChart(
-                    indicatorProperties = HorizontalIndicatorProperties(enabled = false),
-                    modifier = Modifier.padding(horizontal = 22.dp).aspectRatio(1f),
-                    data = remember {
-                        listOf(
-                            Line(
-                                label = "Windows",
-                                values = chartValues,
-                                color = SolidColor(Color(0xFF23af92)),
-                                firstGradientFillColor = Color(0xFF2BC0A1).copy(alpha = .5f),
-                                secondGradientFillColor = Color.Transparent,
-                                strokeAnimationSpec = tween(2000, easing = EaseInOutCubic),
-                                gradientAnimationDelay = 1000,
-                                drawStyle = DrawStyle.Stroke(width = 2.dp),
-                            )
-                        )
-                    },
-                    animationMode = AnimationMode.Together(delayBuilder = {
-                        it * 500L
-                    }),
-                )
-
-            }
-            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center){
-                Row(modifier= Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center){
-                    IconButton(onClick = {
-                        transactionViewModel.clearUserData()
-                        authViewModel.signout()
-                    }) {
-                        Icon(tint = White, imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Close App")
-                    }
-                    Text(text = "Sign Out", color = White)
+                    val sliceColors = listOf(Color(0xFFDA0FFF), Color(0xFF9745FF), Color(0xFF0052FF), Color(0xFFF53844),
+                        Color(0xFF18FFB6), Color(0xFFFFD166),Color(0xFF07FF00)
+                    )
+                    val slices = categoricalData.entries.mapIndexed { index, entry ->
+                        PieChartData.Slice(label = entry.key, value = entry.value, color = sliceColors[index % sliceColors.size])
+                    }.filter { it.value > 0f }
+                    val pieChartData = PieChartData(slices = slices, plotType = PlotType.Pie)
+                    PieChart(
+                        modifier = Modifier.width(400.dp).height(400.dp),
+                        pieChartData = pieChartData,
+                        pieChartConfig = PieChartConfig(isAnimationEnable = true, showSliceLabels = true, animationDuration = 500)
+                    )
+                }
+                Box(modifier = Modifier.fillMaxWidth()){
+                    LineChart(lineChartData = lineChartData, modifier = Modifier.aspectRatio(1f).background(color = Color.Transparent))
                 }
             }
         }
+        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
+            Row(modifier = Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                IconButton(onClick = {
+                    transactionViewModel.clearUserData()
+                    authViewModel.signout()
+                }) {
+                    Icon(tint = White, imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Close App")
+                }
+                Text(text = "Sign Out", color = White)
+            }
+        }
+    }
 }
