@@ -3,12 +3,26 @@
   <component name="AppInsightsSettings">
     <option name="tabSettings">
       <map>
+        <entry key="Android Vitals">
+          <value>
+            <InsightsFilterSettings>
+              <option name="connection">
+                <ConnectionSetting>
+                  <option name="appId" value="com.aman.wealthwise" />
+                </ConnectionSetting>
+              </option>
+              <option name="signal" value="SIGNAL_UNSPECIFIED" />
+              <option name="timeIntervalDays" value="SEVEN_DAYS" />
+              <option name="visibilityType" value="ALL" />
+            </InsightsFilterSettings>
+          </value>
+        </entry>
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.wealthwise" />
+                  <option name="appId" value="com.aman.wealthwise" />
                   <option name="mobileSdkAppId" value="1:574498996446:android:c773ee037fac7b4151424f" />
                   <option name="projectId" value="money-manager-81e8b" />
                   <option name="projectNumber" value="574498996446" />

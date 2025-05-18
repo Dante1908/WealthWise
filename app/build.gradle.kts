@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wealthwise"
+    namespace = "com.aman.wealthwise"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.wealthwise"
+        applicationId = "com.aman.wealthwise"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
