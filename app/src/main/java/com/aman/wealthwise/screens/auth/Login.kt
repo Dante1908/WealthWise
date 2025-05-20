@@ -59,69 +59,20 @@ fun LoginScreen(authViewModel: UserAuth,navController:NavController){
             Spacer(modifier = Modifier.height(20.dp))
             Text(text = "Login",color = Color.White)
             Spacer(modifier = Modifier.height(12.dp))
-            TextField(
-                value = email.value,
-                modifier = Modifier.fillMaxWidth(0.9f),
-                shape = RoundedCornerShape(10.dp),
-                onValueChange = { email.value = it },
-                label = {
-                    Text(text = "Email")
-                })
+            TextField(value = email.value, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), onValueChange = { email.value = it }, label = { Text(text = "Email") })
             Spacer(modifier = Modifier.height(12.dp))
-            TextField(
-                value = password.value,
-                onValueChange = { password.value = it },
-                modifier = Modifier.fillMaxWidth(0.9f),
-                shape = RoundedCornerShape(10.dp),
-                label = { Text(text = "Password") },
-                visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                        Icon(
-                            painter = painterResource(id = if (showPassword.value) R.drawable.visible else R.drawable.invisible),
-                            contentDescription = if (showPassword.value) "Hide Password" else "Show Password"
-                        )
-                    }
-                }
-            )
+            TextField(value = password.value, onValueChange = { password.value = it }, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), label = { Text(text = "Password") }, visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { showPassword.value = !showPassword.value }) { Icon(painter = painterResource(id = if (showPassword.value) R.drawable.visible else R.drawable.invisible), contentDescription = if (showPassword.value) "Hide Password" else "Show Password") } })
             Spacer(modifier = Modifier.height(6.dp))
-            TextButton(onClick = { navController.navigate("ForgotPass") }) {
-                Text(text = "Forgot Password?")
-            }
+            TextButton(onClick = { navController.navigate("ForgotPass") }) { Text(text = "Forgot Password?") }
             Spacer(modifier = Modifier.height(12.dp))
-            Button(onClick = { authViewModel.login(email = email.value, password = password.value) }, shape = RoundedCornerShape(10.dp)) {
-                Text(text = "LOG IN")
-            }
+            Button(onClick = { authViewModel.login(email = email.value, password = password.value) }, shape = RoundedCornerShape(10.dp)) { Text(text = "LOG IN") }
             if(authState is AuthState.Error){
                 val errorMessage = (authState as AuthState.Error).message
                 Text(errorMessage,color = Color.Red)
             }
             Spacer(modifier = Modifier.height(12.dp))
-            TextButton(onClick = { navController.navigate("SignUp") }) {
-                Text(text = "Don't have an account? Sign Up")
-            }
+            TextButton(onClick = { navController.navigate("SignUp") }) { Text(text = "Don't have an account? Sign Up") }
             Spacer(modifier = Modifier.fillMaxHeight(0.5f))
         }
 
-}
-
-
-@Composable
-fun rememberFirebaseAuthLauncher(onAuthComplete:(AuthResult)-> Unit, onAuthError:(ApiException)-> Unit): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()){
-            result->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            Log.d("GoogleAuth","account $account")
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!,null)
-            scope.launch {val authResult = Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete(authResult)
-            }
-        }catch (e: ApiException){
-            Log.d("GoogleAuth",e.toString())
-            onAuthError(e)
-        }
-    }
 }

@@ -1,10 +1,16 @@
 package com.aman.wealthwise
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -38,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +72,6 @@ import com.aman.wealthwise.screens.Home.TransactionsScreen
 import com.aman.wealthwise.screens.auth.ForgotPasswordScreen
 import com.aman.wealthwise.screens.auth.LoginScreen
 import com.aman.wealthwise.screens.auth.SignUpScreen
-import com.aman.wealthwise.screens.auth.rememberFirebaseAuthLauncher
 import com.aman.wealthwise.screens.dialogs.ExitConfirmationDialog
 import com.aman.wealthwise.screens.dialogs.SettingsDialog
 import com.aman.wealthwise.ui.theme.BackgroundBlue
@@ -78,7 +84,14 @@ import com.aman.wealthwise.viewmodels.UserAuth
 import com.commandiron.compose_loading.FoldingCube
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 class MainActivity : ComponentActivity() {
@@ -266,7 +279,26 @@ fun BottomNavBar(navController: NavController){
 
 @Composable
 fun NavigationIcon(navController: NavController, route: String, iconResId: Int) {
-    Image(painter = painterResource(id = iconResId), contentDescription = route, modifier = Modifier
-        .size(25.dp)
-        .clickable { navController.navigate(route) })
+    Image(painter = painterResource(id = iconResId), contentDescription = route, modifier = Modifier.size(25.dp).clickable { navController.navigate(route) })
+}
+
+
+@Composable
+fun rememberFirebaseAuthLauncher(onAuthComplete:(AuthResult)-> Unit, onAuthError:(ApiException)-> Unit): ManagedActivityResultLauncher<Intent, ActivityResult> {
+    val scope = rememberCoroutineScope()
+    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()){ result->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            Log.d("GoogleAuth","account $account")
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!,null)
+            scope.launch {
+                val authResult = Firebase.auth.signInWithCredential(credential).await()
+                onAuthComplete(authResult)
+            }
+        }catch (e: ApiException){
+            Log.d("GoogleAuth",e.toString())
+            onAuthError(e)
+        }
+    }
 }

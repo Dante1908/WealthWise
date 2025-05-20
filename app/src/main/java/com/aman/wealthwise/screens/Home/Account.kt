@@ -111,7 +111,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
         }
         .build()
 
-    val lineChartData = LineChartData(
+    LineChartData(
         linePlotData = LinePlotData(
             lines = listOf(Line(
                 dataPoints = pointsData,
@@ -176,7 +176,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
                     CustomLineChart(modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(16.dp),
                         dataPoints = pointsData,
                         lineColor = Color(0xFF0052FF), // Example: Blue
-                        pointColor = Color.White
+                        pointColor = White
                     )
                 }
             } else {
