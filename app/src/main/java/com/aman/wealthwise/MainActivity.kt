@@ -42,10 +42,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
@@ -63,6 +65,7 @@ import com.aman.wealthwise.screens.Home.TransactionsScreen
 import com.aman.wealthwise.screens.auth.ForgotPasswordScreen
 import com.aman.wealthwise.screens.auth.LoginScreen
 import com.aman.wealthwise.screens.auth.SignUpScreen
+import com.aman.wealthwise.screens.auth.rememberFirebaseAuthLauncher
 import com.aman.wealthwise.screens.dialogs.ExitConfirmationDialog
 import com.aman.wealthwise.screens.dialogs.SettingsDialog
 import com.aman.wealthwise.ui.theme.BackgroundBlue
@@ -73,6 +76,8 @@ import com.aman.wealthwise.viewmodels.AuthState
 import com.aman.wealthwise.viewmodels.TransactionViewModel
 import com.aman.wealthwise.viewmodels.UserAuth
 import com.commandiron.compose_loading.FoldingCube
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.FirebaseApp
 
 
@@ -98,6 +103,12 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
     var showSettingsDialog by remember { mutableStateOf(false) }
     var isBlue by remember { mutableStateOf(true) }
 
+    //Google Account Authentication
+    val token = stringResource(id = R.string.Google_Account_Auth_ID)
+    val googleSignInLauncher = rememberFirebaseAuthLauncher(onAuthComplete = {authViewModel.handleGoogleAuthResult(it)}, onAuthError = {authViewModel.handleGoogleAuthError(it)})
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(token).requestEmail().build()
+    val googleSignInClient = GoogleSignIn.getClient(context,gso)
+
     if (showExitDialog) {
         ExitConfirmationDialog(onConfirm = { activity?.finish() }, onDismiss = { showExitDialog = false })
     }
@@ -117,14 +128,9 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
         }
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(color = if (isBlue) BackgroundBlue else Black)
-        .padding(10.dp)) {
+    Column(modifier = Modifier.fillMaxSize().background(color = if (isBlue) BackgroundBlue else Black).padding(10.dp)) {
         Spacer(modifier = Modifier.height(20.dp))
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentSize(), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.fillMaxWidth().wrapContentSize(), verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(10.dp))
             IconButton(modifier = Modifier.size(60.dp), onClick = { showExitDialog = true }) {
                 Icon(tint = White, imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Close App")
@@ -138,12 +144,8 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
             Spacer(modifier = Modifier.width(10.dp))
         }
         Box(modifier = Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.Center){
-            NavHost(navController = navController, startDestination = "auth") {
-                composable(
-                    route = "Loading",
-                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-                    exitTransition = { fadeOut(animationSpec = tween(300)) }
-                ) {
+            NavHost(navController = navController, startDestination = if(authState==AuthState.Unauthenticated) "auth" else if(authState==AuthState.Authenticated) "main" else "Loading") {
+                composable(route = "Loading", enterTransition = { fadeIn(animationSpec = tween(300)) }, exitTransition = { fadeOut(animationSpec = tween(300)) }) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         FoldingCube(size = DpSize(80.dp, 80.dp), color = Green40, durationMillisPerFraction = 300)
                     }
@@ -154,15 +156,15 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
                         route = "Login",
                         enterTransition = {
                             when (initialState.destination.route) {
-                                "ForgotPass" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300))
-                                "SignUp" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300))
+                                "ForgotPass" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
+                                "SignUp" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
                                 else -> fadeIn(animationSpec = tween(300))
                             }
                         },
                         exitTransition = {
                             when (targetState.destination.route) {
-                                "ForgotPass" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300))
-                                "SignUp" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300))
+                                "ForgotPass" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
+                                "SignUp" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
                                 else -> fadeOut(animationSpec = tween(300))
                             }
                         }
@@ -172,8 +174,8 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
                     //----------------------------------------------------------------------------------------------------------
                     composable(
                         route = "ForgotPass",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300))
+                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) },
+                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
                         }
                     ) {
                         ForgotPasswordScreen(navController = navController, authViewModel = authViewModel)
@@ -181,8 +183,8 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
                     //----------------------------------------------------------------------------------------------------------
                     composable(
                         route = "SignUp",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300)) }
+                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500)) },
+                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) }
                     ) {
                         SignUpScreen(navController = navController, authViewModel = authViewModel)
                     }
@@ -191,8 +193,8 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
                     //------------------------------------------------------------------------------------------------------------
                     composable(
                         route = "Transactions",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300))
+                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) },
+                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
                         }
                     ) {
                         TransactionsScreen(navController, transactionViewModel = transactionViewModel)
@@ -202,15 +204,15 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
                         route = "AddTransaction",
                         enterTransition = {
                             when (initialState.destination.route) {
-                                "Transactions" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300))
-                                "Account" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300))
+                                "Transactions" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
+                                "Account" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
                                 else -> fadeIn(animationSpec = tween(300))
                             }
                         },
                         exitTransition = {
                             when (targetState.destination.route) {
-                                "Transactions" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300))
-                                "Account" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300))
+                                "Transactions" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
+                                "Account" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
                                 else -> fadeOut(animationSpec = tween(300))
                             }
                         }
@@ -220,8 +222,8 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
                     //----------------------------------------------------------------------------------------------------------
                     composable(
                         route = "Account",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 300)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 300)) }
+                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500)) },
+                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) }
                     ) {
                         AccountScreen(authViewModel = authViewModel, transactionViewModel = transactionViewModel, navController = navController)
                     }
@@ -230,20 +232,30 @@ fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: Tran
         }
         if(authState==AuthState.Authenticated && user!=null){
             BottomNavBar(navController)
+        }else if (authState==AuthState.Unauthenticated){
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()){
+                Text(text = "Continue with Google", color = Color.LightGray )
+                IconButton(
+                    onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
+                    modifier = Modifier.wrapContentSize()
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.google_logo),
+                        contentDescription = "Google Logo",
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
 @Composable
 fun BottomNavBar(navController: NavController){
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
-        .border(2.dp, White, shape = RoundedCornerShape(10.dp))
-        .background(Black)) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+    Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp)).background(Black)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
             NavigationIcon(navController, "Transactions", R.drawable.transactions)
             NavigationIcon(navController, "AddTransaction", R.drawable.add)
             NavigationIcon(navController, "Account", R.drawable.account)

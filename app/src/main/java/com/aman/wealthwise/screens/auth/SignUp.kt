@@ -1,12 +1,13 @@
 package com.aman.wealthwise.screens.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -39,9 +40,10 @@ fun SignUpScreen(authViewModel: UserAuth,navController: NavController){
     val password2 = remember { mutableStateOf("") }
     val showPassword2 = remember { mutableStateOf(false) }
     val authState by authViewModel.authState.observeAsState()
-
-        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier.fillMaxHeight(0.4f))
+    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(40.dp))
+            Image(painter = painterResource(id = R.drawable.sign_up), contentDescription = "Sign Up", modifier = Modifier.size(200.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(text = "CREATE ACCOUNT", color = Color.White)
             Spacer(modifier = Modifier.height(12.dp))
             TextField(value = email.value, modifier = Modifier.fillMaxWidth(0.9f),

@@ -12,8 +12,8 @@ android {
         applicationId = "com.aman.wealthwise"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 4
+        versionName = "0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -82,12 +82,12 @@ dependencies {
     implementation(libs.firebase.auth.ktx.v2231)
     implementation(libs.play.services.auth)
     //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     //OKHttp
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation ("com.google.firebase:firebase-firestore:25.1.0")    //firestore
-    implementation ("co.yml:ycharts:2.1.0")  //Y-Charts
-    implementation("io.coil-kt:coil-compose:2.4.0")     //coil compose
+    implementation(libs.okhttp)
+    implementation(libs.gson)
+    implementation (libs.firebase.firestore)    //firestore
+    implementation (libs.ycharts)  //Y-Charts
+    implementation(libs.coil.compose)     //coil compose
 }

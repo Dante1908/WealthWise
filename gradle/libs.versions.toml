@@ -1,6 +1,10 @@
 [versions]
 agp = "8.10.0"
+coilCompose = "2.4.0"
+converterGson = "2.9.0"
 firebaseAuthKtxVersion = "22.3.1"
+firebaseFirestore = "25.1.4"
+gson = "2.11.0"
 kotlin = "1.9.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -11,7 +15,9 @@ activityCompose = "1.10.0"
 composeBom = "2025.01.01"
 navigationRuntimeKtx = "2.8.5"
 navigationCompose = "2.8.5"
+okhttp = "4.11.0"
 playServicesAuth = "21.3.0"
+retrofit = "2.11.0"
 runtimeLivedata = "1.7.6"
 composeloading = "1.0.4"
 firebaseAuthKtx = "23.2.0"
@@ -21,12 +27,17 @@ roomCommon = "2.6.1"
 roomKtx = "2.6.1"
 foundationAndroid = "1.7.8"
 navigationRuntimeAndroid = "2.9.0-rc01"
+ycharts = "2.1.0"
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 composeloading = { module = "com.github.commandiron:ComposeLoading", version.ref = "composeloading"}
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-auth-ktx-v2231 = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtxVersion" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -46,11 +57,14 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 androidx-ui-test-android = { group = "androidx.compose.ui", name = "ui-test-android", version.ref = "uiTestAndroid" }
 androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+ycharts = { module = "co.yml:ycharts", version.ref = "ycharts" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
