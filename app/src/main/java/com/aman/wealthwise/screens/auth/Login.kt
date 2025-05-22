@@ -1,11 +1,5 @@
 package com.aman.wealthwise.screens.auth
 
-import android.content.Intent
-import android.util.Log
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,14 +31,6 @@ import androidx.navigation.NavController
 import com.aman.wealthwise.R
 import com.aman.wealthwise.viewmodels.AuthState
 import com.aman.wealthwise.viewmodels.UserAuth
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
-import com.google.firebase.Firebase
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen(authViewModel: UserAuth,navController:NavController){

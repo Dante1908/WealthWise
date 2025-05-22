@@ -90,4 +90,6 @@ dependencies {
     implementation (libs.firebase.firestore)    //firestore
     implementation (libs.ycharts)  //Y-Charts
     implementation(libs.coil.compose)     //coil compose
+    implementation(libs.androidx.glance)    // Jetpack Glance core
+    implementation(libs.androidx.glance.appwidget) // Optional: Glance AppWidget support
 }

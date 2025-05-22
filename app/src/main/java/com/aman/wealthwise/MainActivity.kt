@@ -60,6 +60,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -81,6 +83,7 @@ import com.aman.wealthwise.ui.theme.Montserrat
 import com.aman.wealthwise.viewmodels.AuthState
 import com.aman.wealthwise.viewmodels.TransactionViewModel
 import com.aman.wealthwise.viewmodels.UserAuth
+import com.aman.wealthwise.widget.AddTransactionWidget
 import com.commandiron.compose_loading.FoldingCube
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -301,4 +304,8 @@ fun rememberFirebaseAuthLauncher(onAuthComplete:(AuthResult)-> Unit, onAuthError
             onAuthError(e)
         }
     }
+}
+
+class HelloWorldWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = AddTransactionWidget()
 }

@@ -9,15 +9,8 @@ import androidx.compose.ui.unit.dp
 import co.yml.charts.common.model.Point
 
 @Composable
-fun CustomLineChart(
-    modifier: Modifier = Modifier,
-    dataPoints: List<Point>,
-    lineColor: Color = Color.Green,
-    pointColor: Color = Color.Red,
-    strokeWidth: Float = 4f
-) {
+fun CustomLineChart(modifier: Modifier = Modifier, dataPoints: List<Point>, lineColor: Color = Color.Green, pointColor: Color = Color.Red, strokeWidth: Float = 4f) {
     if (dataPoints.size < 2) return
-
     Canvas(modifier = modifier) {
         val canvasWidth = size.width
         val canvasHeight = size.height
