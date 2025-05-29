@@ -44,9 +44,9 @@ fun LoginScreen(authViewModel: UserAuth,navController:NavController){
             Spacer(modifier = Modifier.height(20.dp))
             Text(text = "Login",color = Color.White)
             Spacer(modifier = Modifier.height(12.dp))
-            TextField(value = email.value, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), onValueChange = { email.value = it }, label = { Text(text = "Email") })
+            TextField(value = email.value,singleLine = true, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), onValueChange = { email.value = it }, label = { Text(text = "Email") })
             Spacer(modifier = Modifier.height(12.dp))
-            TextField(value = password.value, onValueChange = { password.value = it }, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), label = { Text(text = "Password") }, visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { showPassword.value = !showPassword.value }) { Icon(painter = painterResource(id = if (showPassword.value) R.drawable.visible else R.drawable.invisible), contentDescription = if (showPassword.value) "Hide Password" else "Show Password") } })
+            TextField(value = password.value,singleLine = true, onValueChange = { password.value = it }, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), label = { Text(text = "Password") }, visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(), trailingIcon = { IconButton(onClick = { showPassword.value = !showPassword.value }) { Icon(painter = painterResource(id = if (showPassword.value) R.drawable.visible else R.drawable.invisible), contentDescription = if (showPassword.value) "Hide Password" else "Show Password") } })
             Spacer(modifier = Modifier.height(6.dp))
             TextButton(onClick = { navController.navigate("ForgotPass") }) { Text(text = "Forgot Password?") }
             Spacer(modifier = Modifier.height(12.dp))

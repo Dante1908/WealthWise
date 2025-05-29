@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.aman.wealthwise.datamodels.Categories
 import com.aman.wealthwise.datamodels.TransactionInfo
+import com.aman.wealthwise.datamodels.UserInfo
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth

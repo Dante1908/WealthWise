@@ -1,10 +1,9 @@
-package com.aman.wealthwise.screens.Home
+package com.aman.wealthwise.screens.main
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -54,30 +53,39 @@ import com.aman.wealthwise.ui.theme.Green40
 import com.aman.wealthwise.viewmodels.TransactionViewModel
 import com.aman.wealthwise.viewmodels.TransactionsState
 import com.commandiron.compose_loading.FoldingCube
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
-fun TransactionsScreen(navController: NavController,transactionViewModel: TransactionViewModel,fromLeft:Boolean = false) {
+fun TransactionsScreen(navController: NavController,transactionViewModel: TransactionViewModel) {
 
     val transactions by transactionViewModel.transactions.observeAsState(emptyList())
     val transactionState by transactionViewModel.transactionState.observeAsState(TransactionsState.Loading)
+    val format = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault())
+
+    val sortedTransactions = transactions.sortedByDescending { txn ->
+        try {
+            format.parse("${txn.date} ${txn.time}")?.time ?: 0L
+        } catch (e: Exception) {
+            0L
+        }
+    }
 
     when (transactionState) {
         is TransactionsState.Loading -> {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier
-                .fillMaxSize()
-                .background(color = BackgroundBlue)) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().background(color = BackgroundBlue)) {
                 FoldingCube(size = DpSize(80.dp, 80.dp), color = Green40, durationMillisPerFraction = 300)
             }
         }
         is TransactionsState.Done -> {
-            if (transactions.isEmpty()) {
+            if (sortedTransactions.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No Transactions Available",color = Color.White)
                 }
             } else {
 
                     LazyColumn(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-                        items(transactions) {
+                        items(sortedTransactions) {
                             TransactionItem(it,
                                 onDelete = { transactionViewModel.deleteTransaction(transactionId = it.id) },
                                 onEdit = {

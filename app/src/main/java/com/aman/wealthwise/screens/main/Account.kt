@@ -1,4 +1,4 @@
-package com.aman.wealthwise.screens.Home
+package com.aman.wealthwise.screens.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -47,10 +47,13 @@ import coil.compose.rememberAsyncImagePainter
 import com.aman.wealthwise.charts.CustomLineChart
 import com.aman.wealthwise.charts.CustomPieChart
 import com.aman.wealthwise.datamodels.PieSlice
+import com.aman.wealthwise.datamodels.UserInfo
 import com.aman.wealthwise.ui.theme.Blue40
 import com.aman.wealthwise.ui.theme.Blue80
 import com.aman.wealthwise.viewmodels.TransactionViewModel
 import com.aman.wealthwise.viewmodels.UserAuth
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionViewModel, navController: NavController) {
@@ -66,10 +69,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
 
     val axisData = mutableMapOf<String,Float>()
     val pointsData = mutableListOf<Point>()
-
     var currBalance = 0.0
-    var xDist = 0.0
-
     val dailyChanges = mutableMapOf<String,Double>()
     for(transaction in sortedTransactions){
         val dateStr = transaction.date
@@ -81,12 +81,15 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
             "Transfer" -> dailyChanges[dateStr] = currentChange
         }
     }
-    for((date,change) in dailyChanges.toSortedMap()){
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+    for ((date, change) in dailyChanges.toSortedMap()) {
         currBalance += change
         axisData[date] = currBalance.toFloat()
-        pointsData.add(Point(xDist.toFloat(),currBalance.toFloat()))
-        xDist+=1.0
+        val dateTimestamp = dateFormat.parse(date)?.time?.toFloat() ?: continue
+        pointsData.add(Point(dateTimestamp, currBalance.toFloat()))
     }
+
     val dates = axisData.keys.toList()
     val balances = axisData.values.toList()
 
@@ -111,18 +114,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
         }
         .build()
 
-    LineChartData(
-        linePlotData = LinePlotData(
-            lines = listOf(Line(
-                dataPoints = pointsData,
-                lineStyle = LineStyle(color = Color.Black)
-            ))
-        ),
-        xAxisData = xAxisData,
-        yAxisData = yAxisData,
-        backgroundColor = Color.Transparent
-    )
-
+    LineChartData(linePlotData = LinePlotData(lines = listOf(Line(dataPoints = pointsData, lineStyle = LineStyle(color = Color.Black)))), xAxisData = xAxisData, yAxisData = yAxisData, backgroundColor = Color.Transparent)
     LazyColumn(verticalArrangement = Arrangement.spacedBy(15.dp)) {
         item {
             Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp))) {
@@ -134,6 +126,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
             Spacer(modifier = Modifier.size(10.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 listOf("Expense", "Income", "Transfer").forEach { type ->
@@ -142,6 +135,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
             Box(modifier = Modifier.fillMaxWidth().background(Color.Transparent), contentAlignment = Alignment.Center) {
                 val categoricalData = mutableMapOf<String, Float>()
                 val typeTransactions = sortedTransactions.filter { it.type == typeSelected }.groupBy { it.category }
@@ -150,11 +144,7 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
                     categoricalData[category] = totalAmount
                 }
 
-                val sliceColors = listOf(
-                    Color(0xFFDA0FFF), Color(0xFF9745FF), Color(0xFF0052FF),
-                    Color(0xFFF53844), Color(0xFF18FFB6), Color(0xFFFFD166),
-                    Color(0xFF07FF00)
-                )
+                val sliceColors = listOf(Color(0xFF10B981), Color(0xFF3B82F6), Color(0xFFF59E0B), Color(0xFF8B5CF6), Color(0xFF14B8A6), Color(0xFF6B7280), Color(0xFFEF4444))
 
                 val pieSlices = categoricalData.entries.mapIndexed { index, entry ->
                     PieSlice(
@@ -170,22 +160,23 @@ fun AccountScreen(authViewModel: UserAuth, transactionViewModel: TransactionView
                     Text("No ${typeSelected.lowercase()} data available", color = White)
                 }
             }
-
-            if (pointsData.isNotEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f).background(Color.Transparent), contentAlignment = Alignment.Center) {
-                    CustomLineChart(modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(16.dp),
-                        dataPoints = pointsData,
-                        lineColor = Color(0xFF0052FF), // Example: Blue
-                        pointColor = White
-                    )
-                }
-            } else {
-                Box(modifier = Modifier.fillMaxWidth().height(200.dp).background(color = Color.Transparent), contentAlignment = Alignment.Center) {
-                    Text("No transaction history available", color = White)
+            Spacer(modifier = Modifier.height(10.dp))
+            Box(modifier = Modifier.fillMaxWidth().background(White.copy(alpha = 0.1f)).border(2.dp, White.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp)).clip(RoundedCornerShape(12.dp))){
+                if (pointsData.isNotEmpty()) {
+                    Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f).background(Color.Transparent), contentAlignment = Alignment.Center) {
+                        CustomLineChart(modifier = Modifier.fillMaxWidth().aspectRatio(1f).padding(16.dp),
+                            dataPoints = pointsData,
+                            lineColor = Color(0xFF0052FF),
+                            pointColor = White
+                        )
+                    }
+                } else {
+                    Box(modifier = Modifier.fillMaxWidth().height(200.dp).background(color = Color.Transparent), contentAlignment = Alignment.Center) {
+                        Text("No transaction history available", color = White)
+                    }
                 }
             }
-
-
+            Spacer(modifier = Modifier.height(10.dp))
             Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
                 Row(modifier = Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     IconButton(onClick = {

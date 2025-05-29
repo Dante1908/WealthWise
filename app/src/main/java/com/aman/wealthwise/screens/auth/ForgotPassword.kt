@@ -39,7 +39,7 @@ fun ForgotPasswordScreen(authViewModel: UserAuth, navController: NavController) 
             Spacer(modifier = Modifier.height(20.dp))
             Text(text = "Forgot Password", color = White)
             Spacer(modifier = Modifier.height(12.dp))
-            TextField(value = email.value, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), onValueChange = { email.value = it }, label = { Text(text = "Email") })
+            TextField(value = email.value,singleLine = true, modifier = Modifier.fillMaxWidth(0.9f), shape = RoundedCornerShape(10.dp), onValueChange = { email.value = it }, label = { Text(text = "Email") })
 
             if (authState is AuthState.Error) {
                 val errorMessage = (authState as AuthState.Error).message

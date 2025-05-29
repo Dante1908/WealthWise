@@ -49,6 +49,7 @@ fun SignUpScreen(authViewModel: UserAuth,navController: NavController){
             TextField(value = email.value, modifier = Modifier.fillMaxWidth(0.9f),
                 shape = RoundedCornerShape(10.dp),
                 onValueChange = { email.value = it },
+                singleLine = true,
                 label = {
                     Text(text = "Email")
                 })
@@ -60,6 +61,7 @@ fun SignUpScreen(authViewModel: UserAuth,navController: NavController){
                 shape = RoundedCornerShape(10.dp),
                 label = { Text(text = "Password") },
                 visualTransformation = if (showPassword1.value) VisualTransformation.None else PasswordVisualTransformation(),
+                singleLine = true,
                 trailingIcon = {
                     IconButton(onClick = { showPassword1.value = !showPassword1.value }) {
                         Icon(
@@ -77,6 +79,7 @@ fun SignUpScreen(authViewModel: UserAuth,navController: NavController){
                 shape = RoundedCornerShape(10.dp),
                 label = { Text(text = "Re-enter Password") },
                 visualTransformation = if (showPassword2.value) VisualTransformation.None else PasswordVisualTransformation(),
+                singleLine = true,
                 trailingIcon = {
                     IconButton(onClick = { showPassword2.value = !showPassword2.value }) {
                         Icon(

@@ -68,9 +68,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import com.aman.wealthwise.screens.Home.AccountScreen
-import com.aman.wealthwise.screens.Home.AddTransactionScreen
-import com.aman.wealthwise.screens.Home.TransactionsScreen
+import com.aman.wealthwise.screens.main.AccountScreen
+import com.aman.wealthwise.screens.main.AddTransactionScreen
+import com.aman.wealthwise.screens.main.TransactionsScreen
 import com.aman.wealthwise.screens.auth.ForgotPasswordScreen
 import com.aman.wealthwise.screens.auth.LoginScreen
 import com.aman.wealthwise.screens.auth.SignUpScreen

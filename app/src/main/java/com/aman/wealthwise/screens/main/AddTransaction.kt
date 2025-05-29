@@ -1,4 +1,4 @@
-package com.aman.wealthwise.screens.Home
+package com.aman.wealthwise.screens.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -131,12 +131,12 @@ fun AddTransactionScreen(navController: NavController, transactionViewModel: Tra
             }
         }
         Spacer(modifier = Modifier.size(10.dp))
-        TextField(value = newTransaction.amount, onValueChange = { newTransaction = newTransaction.copy(amount = it) }, label = { Text("Amount *") }, keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
+        TextField(value = newTransaction.amount, onValueChange = { newTransaction = newTransaction.copy(amount = it) }, label = { Text("Amount *") }, keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp),singleLine = true)
         Spacer(modifier = Modifier.size(10.dp))
-        TextField(value = newTransaction.title, onValueChange = { newTransaction = newTransaction.copy(title = it) }, label = { Text("Title *") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
+        TextField(value = newTransaction.title, onValueChange = { newTransaction = newTransaction.copy(title = it) }, label = { Text("Title *") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp), singleLine = true)
         Spacer(modifier = Modifier.size(10.dp))
         Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxWidth().height(TextFieldDefaults.MinHeight).clickable { expandedCategoryMenu = !expandedCategoryMenu }.background(color = Color(0xFFE4DEE7), shape = RoundedCornerShape(10.dp))) {
-            Text(text = if (newTransaction.category == "") "Select Category *" else newTransaction.category, color = Color.DarkGray, modifier = Modifier.padding(10.dp), fontSize = 15.sp)
+            Text(text = if (newTransaction.category == "") "Select Category *" else newTransaction.category, color = if(newTransaction.category=="") Color.DarkGray else Color.Black, modifier = Modifier.padding(10.dp), fontSize = 15.sp)
             DropdownMenu(expanded = expandedCategoryMenu, onDismissRequest = { expandedCategoryMenu = false }) {
                 val categories = when (newTransaction.type) {
                     "Expense" -> Categories.expenseCategory()
@@ -156,7 +156,7 @@ fun AddTransactionScreen(navController: NavController, transactionViewModel: Tra
             }
         }
         Spacer(modifier = Modifier.size(10.dp))
-        TextField(value = newTransaction.account, onValueChange = { newTransaction = newTransaction.copy(account = it) }, label = { Text("Account *") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
+        TextField(value = newTransaction.account,singleLine = true, onValueChange = { newTransaction = newTransaction.copy(account = it) }, label = { Text("Account *") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
         Spacer(modifier = Modifier.size(10.dp))
         TextField(value = newTransaction.description, onValueChange = { newTransaction = newTransaction.copy(description = it) }, label = { Text("Description") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(10.dp))
         Spacer(modifier = Modifier.size(10.dp))
