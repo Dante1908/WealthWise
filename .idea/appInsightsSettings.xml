@@ -23,7 +23,7 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.aman.wealthwise" />
-                  <option name="mobileSdkAppId" value="1:574498996446:android:c773ee037fac7b4151424f" />
+                  <option name="mobileSdkAppId" value="1:574498996446:android:5ad3daa6e716dec951424f" />
                   <option name="projectId" value="money-manager-81e8b" />
                   <option name="projectNumber" value="574498996446" />
                 </ConnectionSetting>

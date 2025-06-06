@@ -8,20 +8,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:574498996446:android:daa9d5d8270fe72751424f",
+        "mobilesdk_app_id": "1:574498996446:android:5ad3daa6e716dec951424f",
         "android_client_info": {
-          "package_name": "com.example.hisaab"
+          "package_name": "com.aman.wealthwise"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "574498996446-2uis3r2bv1qe2tfhqcgg8et2v0rrjem1.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.hisaab",
-            "certificate_hash": "a9d4037ec90b43abe92227211b89b28241fa82dc"
-          }
-        },
         {
           "client_id": "574498996446-kq422p4t7e5141b4t00354p6e6630rrh.apps.googleusercontent.com",
           "client_type": 3
@@ -47,10 +39,26 @@
       "client_info": {
         "mobilesdk_app_id": "1:574498996446:android:c773ee037fac7b4151424f",
         "android_client_info": {
-          "package_name": "com.aman.wealthwise"
+          "package_name": "com.example.wealthwise"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "574498996446-am7kigs3l369uhq26ho0l1evd4jfqeck.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wealthwise",
+            "certificate_hash": "f8fde703d831636320f643f91a6e0cf3a269e579"
+          }
+        },
+        {
+          "client_id": "574498996446-pmm928k42r3kdjgjngbk8kaeg1f1vuok.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wealthwise",
+            "certificate_hash": "a9d4037ec90b43abe92227211b89b28241fa82dc"
+          }
+        },
         {
           "client_id": "574498996446-kq422p4t7e5141b4t00354p6e6630rrh.apps.googleusercontent.com",
           "client_type": 3
