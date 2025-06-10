@@ -1,3 +1,4 @@
 /build
 src/main/res/values/API.xml
 app/src/main/res/values/API.xml
+app/google-services.json
