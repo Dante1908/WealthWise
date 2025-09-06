@@ -11,10 +11,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,6 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,8 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -109,168 +110,328 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LaunchedApp(authViewModel: UserAuth = viewModel(),transactionViewModel: TransactionViewModel = viewModel()) {
+fun LaunchedApp(
+    authViewModel: UserAuth = viewModel(),
+    transactionViewModel: TransactionViewModel = viewModel()
+) {
     val authState by authViewModel.authState.observeAsState(AuthState.Unauthenticated)
     val user by authViewModel.user.observeAsState(null)
     val navController = rememberNavController()
     val context = LocalContext.current
     val activity = context as? Activity
+
     var showExitDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var isBlue by remember { mutableStateOf(true) }
 
-    //Google Account Authentication
+    // Google sign-in setup
     val token = stringResource(id = R.string.Google_Account_Auth_ID)
-    val googleSignInLauncher = rememberFirebaseAuthLauncher(onAuthComplete = {authViewModel.handleGoogleAuthResult(it)}, onAuthError = {authViewModel.handleGoogleAuthError(it)})
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken(token).requestEmail().build()
-    val googleSignInClient = GoogleSignIn.getClient(context,gso)
+    val googleSignInLauncher = rememberFirebaseAuthLauncher(
+        onAuthComplete = { authViewModel.handleGoogleAuthResult(it) },
+        onAuthError = { authViewModel.handleGoogleAuthError(it) }
+    )
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(token)
+        .requestEmail()
+        .build()
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
 
-    if (showExitDialog) {
-        ExitConfirmationDialog(onConfirm = { activity?.finish() }, onDismiss = { showExitDialog = false })
-    }
-    if (showSettingsDialog) {
-        SettingsDialog(onDismiss = { showSettingsDialog = false }, onConfirmChanged = { newIsBlue -> isBlue = newIsBlue }, isBluePrev = isBlue)
-    }
-
+    // Handle authentication state changes
     LaunchedEffect(authState) {
         when (authState) {
-            AuthState.Unauthenticated -> navController.navigate("auth")
+            AuthState.Unauthenticated -> navController.navigate("auth") {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
             AuthState.Authenticated -> {
                 transactionViewModel.fetchTransactions()
-                navController.navigate("main")
+                navController.navigate("main") {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                }
             }
-            AuthState.Loading -> navController.navigate("Loading")
-            else -> navController.navigate("Error")
+            AuthState.Loading -> navController.navigate("Loading") {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
+            else -> navController.navigate("Error") {
+                popUpTo(navController.graph.id) { inclusive = true }
+            }
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(color = if (isBlue) BackgroundBlue else Black).padding(10.dp)) {
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(modifier = Modifier.fillMaxWidth().wrapContentSize(), verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(10.dp))
-            IconButton(modifier = Modifier.size(60.dp), onClick = { showExitDialog = true }) {
-                Icon(tint = White, imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Close App")
+    // Dialogs
+    if (showExitDialog) {
+        ExitConfirmationDialog(
+            onConfirm = { activity?.finish() },
+            onDismiss = { showExitDialog = false }
+        )
+    }
+    if (showSettingsDialog) {
+        SettingsDialog(
+            onDismiss = { showSettingsDialog = false },
+            onConfirmChanged = { newIsBlue -> isBlue = newIsBlue },
+            isBluePrev = isBlue
+        )
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = if (isBlue) BackgroundBlue else Color.Black,
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { showExitDialog = true },
+                    modifier = Modifier.size(60.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = "Close App",
+                        tint = Color.White
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = context.getString(R.string.app_name),
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Blue80
+                    ),
+                    fontFamily = Montserrat
+                )
+                Spacer(Modifier.weight(1f))
+                IconButton(
+                    onClick = { showSettingsDialog = true },
+                    modifier = Modifier.size(60.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = Color.White
+                    )
+                }
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(text = context.getString(R.string.app_name), style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Blue80), fontFamily = Montserrat)
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(modifier = Modifier.size(60.dp), onClick = { showSettingsDialog = true }) {
-                Icon(imageVector = Icons.Default.Settings, tint = White, contentDescription = "Settings")
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-        }
-        Box(modifier = Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.Center){
-            NavHost(navController = navController, startDestination = if(authState==AuthState.Unauthenticated) "auth" else if(authState==AuthState.Authenticated) "main" else "Loading") {
-                composable(route = "Loading", enterTransition = { fadeIn(animationSpec = tween(300)) }, exitTransition = { fadeOut(animationSpec = tween(300)) }) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        FoldingCube(size = DpSize(80.dp, 80.dp), color = Green40, durationMillisPerFraction = 300)
+        },
+        bottomBar = {
+            if (authState == AuthState.Authenticated && user != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
+                ) {
+                    BottomNavBar(navController)
+                }
+            } else if (authState == AuthState.Unauthenticated) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(bottom = 10.dp)
+                ) {
+                    Text(text = "Continue with Google", color = Color.LightGray)
+                    IconButton(
+                        onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
+                        modifier = Modifier.wrapContentSize()
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.google_logo),
+                            contentDescription = "Google Logo",
+                            modifier = Modifier.size(40.dp)
+                        )
                     }
                 }
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier.padding(innerPadding).fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = when (authState) {
+                    AuthState.Unauthenticated -> "auth"
+                    AuthState.Authenticated -> "main"
+                    else -> "Loading"
+                }
+            ) {
+                composable(
+                    route = "Loading",
+                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                    exitTransition = { fadeOut(animationSpec = tween(300)) }
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        FoldingCube(
+                            size = DpSize(80.dp, 80.dp),
+                            color = Green40,
+                            durationMillisPerFraction = 300
+                        )
+                    }
+                }
+
                 navigation(startDestination = "Login", route = "auth") {
-                    //----------------------------------------------------------------------------------------------------------
                     composable(
                         route = "Login",
                         enterTransition = {
                             when (initialState.destination.route) {
-                                "ForgotPass" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
-                                "SignUp" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
+                                "ForgotPass" -> slideInHorizontally(
+                                    initialOffsetX = { fullWidth -> fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
+                                "SignUp" -> slideInHorizontally(
+                                    initialOffsetX = { fullWidth -> -fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
                                 else -> fadeIn(animationSpec = tween(300))
                             }
                         },
                         exitTransition = {
                             when (targetState.destination.route) {
-                                "ForgotPass" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
-                                "SignUp" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
+                                "ForgotPass" -> slideOutHorizontally(
+                                    targetOffsetX = { fullWidth -> fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
+                                "SignUp" -> slideOutHorizontally(
+                                    targetOffsetX = { fullWidth -> -fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
                                 else -> fadeOut(animationSpec = tween(300))
                             }
                         }
                     ) {
                         LoginScreen(navController = navController, authViewModel = authViewModel)
                     }
-                    //----------------------------------------------------------------------------------------------------------
+
                     composable(
                         route = "ForgotPass",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
                         }
                     ) {
                         ForgotPasswordScreen(navController = navController, authViewModel = authViewModel)
                     }
-                    //----------------------------------------------------------------------------------------------------------
+
                     composable(
                         route = "SignUp",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) }
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
+                        }
                     ) {
                         SignUpScreen(navController = navController, authViewModel = authViewModel)
                     }
                 }
+
                 navigation(startDestination = "Transactions", route = "main") {
-                    //------------------------------------------------------------------------------------------------------------
                     composable(
                         route = "Transactions",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
                         }
                     ) {
                         TransactionsScreen(navController, transactionViewModel = transactionViewModel)
                     }
-                    //----------------------------------------------------------------------------------------------------------
+
                     composable(
                         route = "AddTransaction",
                         enterTransition = {
                             when (initialState.destination.route) {
-                                "Transactions" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
-                                "Account" -> slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
+                                "Transactions" -> slideInHorizontally(
+                                    initialOffsetX = { fullWidth -> fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
+                                "Account" -> slideInHorizontally(
+                                    initialOffsetX = { fullWidth -> -fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
                                 else -> fadeIn(animationSpec = tween(300))
                             }
                         },
                         exitTransition = {
                             when (targetState.destination.route) {
-                                "Transactions" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500))
-                                "Account" -> slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500))
+                                "Transactions" -> slideOutHorizontally(
+                                    targetOffsetX = { fullWidth -> fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
+                                "Account" -> slideOutHorizontally(
+                                    targetOffsetX = { fullWidth -> -fullWidth },
+                                    animationSpec = tween(durationMillis = 500)
+                                )
                                 else -> fadeOut(animationSpec = tween(300))
                             }
                         }
                     ) {
-                        AddTransactionScreen(navController, transactionViewModel = transactionViewModel, transactionInfo = transactionViewModel.editTransaction.value)
+                        AddTransactionScreen(
+                            navController,
+                            transactionViewModel = transactionViewModel,
+                            transactionInfo = transactionViewModel.editTransaction.value
+                        )
                     }
-                    //----------------------------------------------------------------------------------------------------------
+
                     composable(
                         route = "Account",
-                        enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(durationMillis = 500)) },
-                        exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(durationMillis = 500)) }
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(durationMillis = 500)
+                            )
+                        }
                     ) {
-                        AccountScreen(authViewModel = authViewModel, transactionViewModel = transactionViewModel, navController = navController)
+                        AccountScreen(
+                            authViewModel = authViewModel,
+                            transactionViewModel = transactionViewModel,
+                            navController = navController
+                        )
                     }
                 }
             }
         }
-        if(authState==AuthState.Authenticated && user!=null){
-            BottomNavBar(navController)
-        }else if (authState==AuthState.Unauthenticated){
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()){
-                Text(text = "Continue with Google", color = Color.LightGray )
-                IconButton(
-                    onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
-                    modifier = Modifier.wrapContentSize()
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.google_logo),
-                        contentDescription = "Google Logo",
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-        }
-        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 
 @Composable
 fun BottomNavBar(navController: NavController){
-    Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, White, shape = RoundedCornerShape(10.dp)).background(Black)) {
+    Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).border(2.dp, Color.White, shape = RoundedCornerShape(10.dp)).background(Color.Black).navigationBarsPadding()) {
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
             NavigationIcon(navController, "Transactions", R.drawable.transactions)
             NavigationIcon(navController, "AddTransaction", R.drawable.add)
