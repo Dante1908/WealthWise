@@ -40,6 +40,7 @@ fun CustomLineChart(modifier: Modifier = Modifier, dataPoints: List<Point>, line
     var tooltipPosition by remember { mutableStateOf(Offset.Zero) }
 
     Box(modifier = modifier) {
+        Text(text = "Balance", color = Color.LightGray)
         Canvas(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
                     detectTapGestures { offset ->
                         val canvasWidth = size.width.toFloat()
