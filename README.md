@@ -1,5 +1,6 @@
 # WealthWise — Personal Finance Management App
 
+**[Live Demo (Online)](https://appetize.io/embed/b_glrxezd6iwiwoqhewmtdhnzrdu)**
 **WealthWise** is a production-ready, user-friendly Android app built using **Kotlin** , **Jetpack Compose** and **Google Firebase**.
 It helps users track expenses, manage income, and gain better control over their personal finances with a sleek and modern UI.
 
